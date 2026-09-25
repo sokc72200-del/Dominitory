@@ -1,0 +1,78 @@
+services:
+    backend-service:
+        container_name: backend-container
+        build:
+            context: .
+            dockerfile: docker/laravel/Dockerfile
+        working_dir: /var/www/html
+        volumes:
+            - ./backend-app:/var/www/html
+            - backend_data:/var/www/html/vendor
+            - ./docker/laravel/entrypoint.development.sh:/usr/local/bin/entrypoint.development.sh
+        ports:
+            - "8000:8000"
+        depends_on:
+            mysql-service:
+                condition: service_healthy
+        command: ["bash", "/usr/local/bin/entrypoint.development.sh"]
+
+    frontend-service:
+        container_name: frontend-container
+        build:
+            context: .
+            dockerfile: docker/vuejs/Dockerfile
+        working_dir: /app
+        volumes:
+            - ./frontend-app:/app
+            - frontend_data:/app/node_modules
+            - ./docker/vuejs/entrypoint.development.sh:/usr/local/bin/entrypoint.development.sh
+        ports:
+            - "5173:5173"
+        depends_on:
+            - backend-service
+        command: ["sh", "/usr/local/bin/entrypoint.development.sh"]
+
+    mysql-service:
+        image: mysql:8.0
+        container_name: mysql-db-container
+        environment:
+            MYSQL_DATABASE: Dominitory_system
+            MYSQL_USER: Dominitory_user
+            MYSQL_PASSWORD: Dominitory_password
+            MYSQL_ROOT_PASSWORD: root
+            TZ: UTC
+        volumes:
+            - mysql_data_library_sp:/var/lib/mysql
+        healthcheck:
+            test:
+                [
+                    "CMD",
+                    "mysqladmin",
+                    "ping",
+                    "-h",
+                    "localhost",
+                    "-uroot",
+                    "-proot",
+                ]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+            start_period: 30s
+
+    phpmyadmin:
+        image: phpmyadmin:5.2.2
+        container_name: phpmyadmin-display-container
+        depends_on:
+            - mysql-service
+        environment:
+            UPLOAD_LIMIT: 50M
+            PMA_HOST: mysql-service
+            PMA_PORT: 3306
+            PMA_USER: root
+            PMA_PASSWORD: root
+        ports:
+            - "9000:80"
+volumes:
+    mysql_data_library_sp:
+    backend_data:
+    frontend_data:
