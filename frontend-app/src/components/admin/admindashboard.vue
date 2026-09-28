@@ -42,7 +42,7 @@ async function logout() {
 <template>
   <main class="auth-shell">
     <section class="auth-card dashboard">
-      <h1>Dashboard</h1>
+      <h1>Admin Dashboard</h1>
       <p>
         Welcome,
         <strong>{{ userName }}</strong>
