@@ -1,10 +1,5 @@
 <script setup>
-import { useRouter } from "vue-router";
-import { useAuthStore } from "@/stores/auth";
-import SignIn from "@/components/SignIn.vue";
-
-const router = useRouter();
-const auth = useAuthStore();
+import { reactive } from "vue";
 
 const emit = defineEmits(["submit-login", "switch-mode"]);
 const form = reactive({
@@ -17,20 +12,10 @@ function submit() {
   form.email = "";
   form.password = "";
 }
-async function handleLogin(credentials) {
-  try {
-    const user = await auth.login(credentials);
-    router.push(user.role === "admin" ? "/admin" : "/dashboard");
-  } catch (err) {
-    console.error(err);
-    // show an error message to the user here
-  }
-}
 </script>
 
 <template>
-  <SignIn @submit-login="handleLogin" @switch-mode="/* handle signup switch */" />
-  <section>
+  <section class="signin-panel">
     <h1>Welcome back</h1>
 
     <form class="auth-form" @submit.prevent="submit">
