@@ -13,9 +13,9 @@ class RoomController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Room::withCount('student');
+        $query = Room::withCount('students');
 
-        if ($request->filled('gender')){
+        if ($request->filled('gender')) {
             $query->where('gender', $request->gender);
         }
 
@@ -29,15 +29,15 @@ class RoomController extends Controller
     {
         $data = $request->validate([
             'room_number' => 'required|string|unique:rooms,room_number',
-            'gender' => 'required|in:male,female',
-            'floor' => 'required|integer|min:o',
-            'capacity' => 'required|integer|min:1',
-            'status' =>'somtimes|in:avilable,full,maintenance',
+            'gender'      => 'required|in:male,female',
+            'floor'       => 'required|integer|min:0',
+            'capacity'    => 'required|integer|min:1',
+            'status'      => 'sometimes|in:available,full,maintenance',
         ]);
 
         $room = Room::create($data);
 
-        return response()->json($room,201);
+        return response()->json($room, 201);
     }
 
     /**
@@ -55,10 +55,10 @@ class RoomController extends Controller
     {
         $data = $request->validate([
             'room_number' => 'required|string|unique:rooms,room_number,' . $room->id,
-            'gender' => 'required|in:male,female',
-            'floor' => 'required|integer|min:o',
-            'capacity' => 'required|integer|min:1',
-            'status' =>'somtimes|in:avilable,full,maintenance',
+            'gender'      => 'required|in:male,female',
+            'floor'       => 'required|integer|min:0',
+            'capacity'    => 'required|integer|min:1',
+            'status'      => 'sometimes|in:available,full,maintenance',
         ]);
 
         $room->update($data);
@@ -73,6 +73,6 @@ class RoomController extends Controller
     {
         $room->delete();
 
-        return response()->json(['message' => 'Room Delete']);
+        return response()->json(['message' => 'Room deleted']);
     }
 }

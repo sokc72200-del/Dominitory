@@ -16,12 +16,11 @@ class StudentController extends Controller
     {
         $query = Student::with('room');
 
-        if ($request->filled('gender')){
+        if ($request->filled('gender')) {
             $query->where('gender', $request->gender);
         }
 
         return response()->json($query->orderBy('name')->get());
-
     }
 
     /**
@@ -30,13 +29,13 @@ class StudentController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'user_id' => 'required|exists:users,id|unique:student,user_id',
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:students,email',
-            'gender' => 'required|in:male,female',
-            'phone' => 'nullable|string|max:20',
-            'address' => 'nullable|string|max:255',
-            'room_id' => 'nullable|exists:room,id',
+            'user_id'       => 'required|exists:users,id|unique:students,user_id',
+            'name'          => 'required|string|max:255',
+            'email'         => 'required|email|unique:students,email',
+            'gender'        => 'required|in:male,female',
+            'phone'         => 'nullable|string|max:20',
+            'address'       => 'nullable|string|max:255',
+            'room_id'       => 'nullable|exists:rooms,id',
             'date_of_birth' => 'nullable|date',
         ]);
 
@@ -55,7 +54,7 @@ class StudentController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Request $request)
+    public function show(Student $student)
     {
         return response()->json($student->load(['room', 'user']));
     }
@@ -63,7 +62,7 @@ class StudentController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, Student $student)
     {
         $data = $request->validate([
             'name'          => 'sometimes|string|max:255',
@@ -75,12 +74,12 @@ class StudentController extends Controller
             'date_of_birth' => 'nullable|date',
         ]);
 
-        $gender = $data['gender']?? $student->gender;
+        $gender = $data['gender'] ?? $student->gender;
 
-        if (!empty($data['room_id']) && $data['room_id'] != $student->room_id){
+        if (!empty($data['room_id']) && $data['room_id'] != $student->room_id) {
             $error = $this->roomProblem($data['room_id'], $gender);
-            if ($error){
-                return response()->json(['errors' => ['room_id'=>[$error]]], 422);
+            if ($error) {
+                return response()->json(['errors' => ['room_id' => [$error]]], 422);
             }
         }
 
@@ -92,14 +91,15 @@ class StudentController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Request $request)
+    public function destroy(Student $student)
     {
         $student->delete();
 
-        return response()->json(['message' => 'Student Delete']);
+        return response()->json(['message' => 'Student deleted']);
     }
 
-    public function assignRoom(Request $request, Student $student){
+    public function assignRoom(Request $request, Student $student)
+    {
         $data = $request->validate([
             'room_id' => 'required|exists:rooms,id',
         ]);
@@ -114,15 +114,16 @@ class StudentController extends Controller
         return response()->json($student->load('room'));
     }
 
-    private function roomProblem(int $roomId, ?string $studentGender): ?string{
+    private function roomProblem(int $roomId, ?string $studentGender): ?string
+    {
         $room = Room::withCount('students')->find($roomId);
 
-        if ($room->gender !== $studentGender){
-            return "this room is for {$room->gender} students only.";
+        if ($room->gender !== $studentGender) {
+            return "This room is for {$room->gender} students only.";
         }
 
-        if ($room->students_count >= $room->capacity){
-            return 'This room is already full. ';
+        if ($room->students_count >= $room->capacity) {
+            return 'This room is already full.';
         }
 
         return null;

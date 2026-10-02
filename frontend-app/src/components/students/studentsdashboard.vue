@@ -43,17 +43,33 @@ async function logout() {
 </script>
 
 <template>
-  <main class="auth-shell">
-    <section class="auth-card dashboard">
-      <h1>User Dashboard</h1>
-      <p>
-        Welcome,
-        <strong>{{ userName }}</strong>
-      </p>
+  <main class="student-shell">
+    <section class="student-card">
+      <div class="student-banner">
+        <span class="student-avatar">{{
+          userName
+            .split(" ")
+            .map((n) => n[0])
+            .join("")
+            .slice(0, 2)
+            .toUpperCase()
+        }}</span>
+        <div class="student-banner-copy">
+          <p>Resident portal</p>
+          <h1>{{ userName }}</h1>
+        </div>
+      </div>
 
-      <button class="logout-button" type="button" @click="logout">
-        Logout
-      </button>
+      <div class="student-body">
+        <div class="room-placeholder">
+          Room assignment not loaded yet — wire this up to
+          <code>GET /api/my-room</code>.
+        </div>
+
+        <button class="logout-button" type="button" @click="logout">
+          Logout
+        </button>
+      </div>
     </section>
   </main>
 </template>
